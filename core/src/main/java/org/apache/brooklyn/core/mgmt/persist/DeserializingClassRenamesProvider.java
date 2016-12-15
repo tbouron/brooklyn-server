@@ -37,7 +37,8 @@ import com.google.common.collect.Maps;
 public class DeserializingClassRenamesProvider {
 
     public static final String DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH = "classpath://org/apache/brooklyn/core/mgmt/persist/deserializingClassRenames.properties";
-    
+    public static final String KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH = "file:etc/org.apache.brooklyn.persistence.class.rename.properties";
+
     private static volatile Map<String, String> cache;
     
     @Beta
@@ -54,12 +55,20 @@ public class DeserializingClassRenamesProvider {
     }
     
     private static Map<String, String> loadDeserializingClassRenamesCache() {
-        InputStream resource = new ResourceUtils(DeserializingClassRenamesProvider.class).getResourceFromUrl(DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH);
-        if (resource != null) {
+        return ImmutableMap.<String, String>builder()
+                .putAll(loadDeserializingClassRenamesCacheFromUrl(DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH))
+                .putAll(loadDeserializingClassRenamesCacheFromUrl(KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH))
+                .build();
+    }
+
+    private static Map<String, String> loadDeserializingClassRenamesCacheFromUrl(String url) {
+        try {
+            InputStream resource = new ResourceUtils(DeserializingClassRenamesProvider.class).getResourceFromUrl(url);
+
             try {
                 Properties props = new Properties();
                 props.load(resource);
-                
+
                 Map<String, String> result = Maps.newLinkedHashMap();
                 for (Enumeration<?> iter = props.propertyNames(); iter.hasMoreElements();) {
                     String key = (String) iter.nextElement();
@@ -72,7 +81,7 @@ public class DeserializingClassRenamesProvider {
             } finally {
                 Streams.closeQuietly(resource);
             }
-        } else {
+        } catch (Exception e) {
             return ImmutableMap.<String, String>of();
         }
     }
