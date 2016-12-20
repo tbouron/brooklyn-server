@@ -37,6 +37,7 @@ import org.apache.brooklyn.core.internal.BrooklynProperties;
 import org.apache.brooklyn.core.location.PortRanges;
 import org.apache.brooklyn.core.mgmt.internal.BrooklynShutdownHooks;
 import org.apache.brooklyn.core.mgmt.internal.ManagementContextInternal;
+import org.apache.brooklyn.core.mgmt.persist.DeserializingClassRenamesProvider;
 import org.apache.brooklyn.core.mgmt.persist.PersistMode;
 import org.apache.brooklyn.entity.brooklynnode.BrooklynNode;
 import org.apache.brooklyn.entity.brooklynnode.LocalBrooklynNode;
@@ -243,6 +244,8 @@ public class BrooklynLauncher extends BasicLauncher<BrooklynLauncher> {
         if (customizeManagement!=null) {
             customizeManagement.apply(getManagementContext());
         }
+
+        DeserializingClassRenamesProvider.initInstance();
     }
 
     protected void initBrooklynPropertiesBuilder() {
@@ -260,6 +263,8 @@ public class BrooklynLauncher extends BasicLauncher<BrooklynLauncher> {
     private Supplier<Map<?, ?>> getBrooklynPropertiesSupplier() {
         return brooklynPropertiesSupplier;
     }
+
+
 
     @Override
     protected void startingUp() {

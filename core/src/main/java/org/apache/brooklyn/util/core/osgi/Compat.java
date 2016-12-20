@@ -19,6 +19,7 @@ import org.apache.brooklyn.api.mgmt.ManagementContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -39,6 +40,7 @@ public class Compat {
     }
 
     private final ServiceTracker managementContextTracker;
+    private final ServiceTracker configurationAdminTracker;
 
     private Compat() {
         Bundle bundle = FrameworkUtil.getBundle(Compat.class);
@@ -46,8 +48,11 @@ public class Compat {
             BundleContext bundleContext = bundle.getBundleContext();
             managementContextTracker = new ServiceTracker(bundleContext, ManagementContext.class, null);
             managementContextTracker.open();
+            configurationAdminTracker = new ServiceTracker(bundleContext, ConfigurationAdmin.class, null);
+            configurationAdminTracker.open();
         } else {
             managementContextTracker = null;
+            configurationAdminTracker = null;
         }
     }
 
@@ -63,6 +68,22 @@ public class Compat {
     public ManagementContext getManagementContext() {
         if (managementContextTracker != null) {
             return (ManagementContext) managementContextTracker.getService();
+        }
+        return null;
+    }
+
+    /**
+     * Provides the configuration admin service.
+     *
+     * From the encompassing OSGi framework. Will return null for classic launcher.
+     *
+     * @todo This does not allow ungetting the service after usage, so the bundle will remain blocked until all dependent bundles are
+     * stopped.
+     * @fixme Drop this for good after switching to karaf launcher.
+     */
+    public ConfigurationAdmin getConfigurationAdmin() {
+        if (configurationAdminTracker != null) {
+            return (ConfigurationAdmin) configurationAdminTracker.getService();
         }
         return null;
     }

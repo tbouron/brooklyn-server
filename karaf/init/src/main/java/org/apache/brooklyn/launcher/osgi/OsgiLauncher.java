@@ -25,6 +25,7 @@ import org.apache.brooklyn.api.mgmt.ha.HighAvailabilityMode;
 import org.apache.brooklyn.core.BrooklynVersionService;
 import org.apache.brooklyn.core.catalog.internal.CatalogInitialization;
 import org.apache.brooklyn.core.internal.BrooklynProperties;
+import org.apache.brooklyn.core.mgmt.persist.DeserializingClassRenamesProvider;
 import org.apache.brooklyn.core.mgmt.persist.PersistMode;
 import org.apache.brooklyn.launcher.common.BasicLauncher;
 import org.apache.brooklyn.launcher.common.BrooklynPropertiesFactoryHelper;
@@ -59,6 +60,8 @@ public class OsgiLauncher extends BasicLauncher<OsgiLauncher> {
 
     private ConfigurationAdmin configAdmin;
     private ConfigSupplier configSupplier;
+
+    private DeserializingClassRenamesProvider deserializingClassRenamesProvider;
 
 
     @Override
@@ -197,6 +200,10 @@ public class OsgiLauncher extends BasicLauncher<OsgiLauncher> {
 
     public void setLocalBrooklynProperties(String localBrooklynProperties) {
         this.localBrooklynProperties = localBrooklynProperties;
+    }
+
+    public void setDeserializingClassRenamesProvider(DeserializingClassRenamesProvider deserializingClassRenamesProvider) {
+        this.deserializingClassRenamesProvider = deserializingClassRenamesProvider;
     }
 
 }
