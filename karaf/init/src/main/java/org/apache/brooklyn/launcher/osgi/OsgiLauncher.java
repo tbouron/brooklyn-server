@@ -61,9 +61,6 @@ public class OsgiLauncher extends BasicLauncher<OsgiLauncher> {
     private ConfigurationAdmin configAdmin;
     private ConfigSupplier configSupplier;
 
-    private DeserializingClassRenamesProvider deserializingClassRenamesProvider;
-
-
     @Override
     public OsgiLauncher start() {
         // make sure brooklyn-core bundle is started
@@ -202,8 +199,7 @@ public class OsgiLauncher extends BasicLauncher<OsgiLauncher> {
         this.localBrooklynProperties = localBrooklynProperties;
     }
 
-    public void setDeserializingClassRenamesProvider(DeserializingClassRenamesProvider deserializingClassRenamesProvider) {
-        this.deserializingClassRenamesProvider = deserializingClassRenamesProvider;
+    public void setDeserializingClassRenamesProvider(DeserializingClassRenamesProvider.OsgiConfigLoader val) {
+        // no-op; only required to force the OsgiConfigLoader to be constructed before the OsgiLauncher
     }
-
 }

@@ -75,7 +75,18 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>!org.apache.brooklyn.core.internal.BrooklynProperties.Factory, *</Import-Package>
+            <!--
+                See http://stackoverflow.com/questions/18844987/creating-a-blueprint-bean-from-an-inner-class:
+                we unfortunately need to exclude DeserializingClassRenamesProvider from the imports. 
+                Its inner class is referenced in a bean of blueprint.xml. This confuses the mvn 
+                plugin, which would otherwise add it to the Import-Package (thus causing the bundle
+                to fail to install).
+            -->
+            <Import-Package>
+                !org.apache.brooklyn.core.internal.BrooklynProperties.Factory, 
+                !org.apache.brooklyn.core.mgmt.persist.DeserializingClassRenamesProvider,
+                *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

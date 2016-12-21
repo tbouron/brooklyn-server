@@ -47,6 +47,18 @@ limitations under the License.
         </cm:default-properties>
     </cm:property-placeholder>
 
+    <bean id="deserializingClassRenamesProvider"
+          class="org.apache.brooklyn.core.mgmt.persist.DeserializingClassRenamesProvider.OsgiConfigLoader"
+          init-method="init"
+          destroy-method="destroy">
+
+        <property name="configAdmin" ref="configAdmin" />
+
+        <cm:managed-properties persistent-id="org.apache.brooklyn.classrename"
+                               update-method="updateProperties"
+                               update-strategy="component-managed" />
+    </bean>
+
     <bean id="launcher"
           class="org.apache.brooklyn.launcher.osgi.OsgiLauncher"
           init-method="init"
@@ -68,17 +80,6 @@ limitations under the License.
         <property name="deserializingClassRenamesProvider" ref="deserializingClassRenamesProvider" />
 
         <cm:managed-properties persistent-id="brooklyn"
-                               update-method="updateProperties"
-                               update-strategy="component-managed" />
-    </bean>
-
-    <bean id="deserializingClassRenamesProvider"
-          class="org.apache.brooklyn.core.mgmt.persist.DeserializingClassRenamesProvider"
-          init-method="init">
-
-        <property name="configAdmin" ref="configAdmin" />
-
-        <cm:managed-properties persistent-id="org.apache.brooklyn.class-rename"
                                update-method="updateProperties"
                                update-strategy="component-managed" />
     </bean>
