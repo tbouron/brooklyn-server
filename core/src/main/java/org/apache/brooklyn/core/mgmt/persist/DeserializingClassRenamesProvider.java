@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -61,6 +62,7 @@ public class DeserializingClassRenamesProvider {
      */
     
     private static final Logger LOG = LoggerFactory.getLogger(DeserializingClassRenamesProvider.class);
+    private static final List<String> EXCLUDED_KEYS = ImmutableList.of("service.pid", "felix.fileinstall.filename");
 
     public static final String DESERIALIZING_CLASS_RENAMES_PROPERTIES_PATH = "classpath://org/apache/brooklyn/core/mgmt/persist/deserializingClassRenames.properties";
     public static final String KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES = "org.apache.brooklyn.classrename";
@@ -161,8 +163,6 @@ public class DeserializingClassRenamesProvider {
                 LOG.warn("No OSGi configuration-admin available - cannot load {}.cfg", KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES);
                 return ImmutableMap.of();
             }
-
-            listAllConfiguration(configAdmin);
             
             String filter = '(' + Constants.SERVICE_PID + '=' + KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES + ')';
             Configuration[] configs;
@@ -177,10 +177,8 @@ public class DeserializingClassRenamesProvider {
             final MutableMap<String, String> map = MutableMap.of();
             if (configs != null) {
                 for (Configuration config : configs) {
-                    LOG.debug("Reading OSGi configuration from {}", config.getPid());
-                    if (KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES.equals(config.getPid())) {
-                        map.putAll(dictToMap(config.getProperties()));
-                    }
+                    LOG.debug("Reading OSGi configuration from {}; bundleLocation={}", config.getPid(), config.getBundleLocation());
+                    map.putAll(dictToMap(config.getProperties()));
                 }
             } else {
                 LOG.info("No OSGi configuration found for {}.cfg", KARAF_DESERIALIZING_CLASS_RENAMES_PROPERTIES);
@@ -194,30 +192,11 @@ public class DeserializingClassRenamesProvider {
             Enumeration<String> keyEnum = props.keys();
             while (keyEnum.hasMoreElements()) {
                 String key = keyEnum.nextElement();
-                mapProps.put(key, (String) props.get(key));
+                if (!EXCLUDED_KEYS.contains(key)) {
+                    mapProps.put(key, (String) props.get(key));
+                }
             }
             return mapProps;
-        }
-        
-        private void listAllConfiguration(ConfigurationAdmin configAdmin) {
-            if (LOG.isTraceEnabled()) {
-                String filter = null;
-                Configuration[] configs;
-                try {
-                    configs = configAdmin.listConfigurations(filter);
-                } catch (InvalidSyntaxException | IOException e) {
-                    throw Exceptions.propagate(e);
-                }
-                StringBuilder msg = new StringBuilder("Listing all OSGi configurations, loaded from DeserializingClassRenamesProvider: ");
-                if (configs != null) {
-                    for (Configuration config : configs) {
-                        msg.append("\n\t" + "pid="+config.getPid()+"; factoryPid="+config.getFactoryPid()+"; bundleLocation="+config.getBundleLocation());
-                    }
-                } else {
-                    msg.append("null");
-                }
-                LOG.trace(msg.toString());
-            }
         }
     }
     
@@ -254,24 +233,4 @@ public class DeserializingClassRenamesProvider {
             }
         }
     }
-    
-//    public void contextInitialized() {
-//
-//        final BundleContext bundleContext = FrameworkUtil.getBundle(DeserializingClassRenamesProvider.class).getBundleContext();
-//        bundleContext.addBundleListener(new BundleListener() {
-//            @Override
-//            public void bundleChanged(BundleEvent bundleEvent) {
-//                final URL resource = bundleEvent.getBundle().getResource("org.apache.brooklyn.persistence.class.rename.properties");
-//                // Read properties file
-//                switch (bundleEvent.getType()) {
-//                    case BundleEvent.STARTED:
-//                        // Add properties to the cache
-//                        break;
-//                    case BundleEvent.STOPPED:
-//                        // Remove properties from the cache
-//                        break;
-//                }
-//            }
-//        });
-//    }
 }
